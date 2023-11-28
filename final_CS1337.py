@@ -1,0 +1,123 @@
+import datetime
+import csv
+
+# Global Variables
+player_list = []
+current_date = datetime.datetime.now()
+
+# Calculates a players average
+def calc_avg(row):
+    hits = int(row['H'])
+    at_bats = int(row['AB'])
+
+    # Checks for division by 0
+    if at_bats == 0:
+        average = "N/A"
+    else:
+        average =  round(hits / at_bats,3)
+    return average
+        
+# Reads the user's given file
+def read_csv_file(file_name):
+    with open(file_name, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            player_list.append({
+                'name': f"{row['Fname']} {row['Lname']}",
+                'position': row['Position'],
+                'at_bats': int(row['AB']),
+                'hits': int(row['H']),
+                'average': calc_avg(row)
+            })
+
+# Gets the current date
+def get_date_current(current_date):
+    formatted_date = current_date.strftime('%Y-%m-%d')
+    print("CURRENT DATE:\t", formatted_date)
+
+# Gets the date of the game and calculates the days till the game
+def get_date_game(current_date):
+    while True:
+        game_date_str = input("GAME DATE:\t ")
+        try:
+            game_date = datetime.datetime.strptime(game_date_str, '%Y-%m-%d')
+            days_until_game = (game_date - current_date).days
+            return days_until_game
+        except ValueError:
+            print("Invalid date format. Please enter the date in the 'yyyy-mm-dd' format.")
+
+# Displays the menu options
+def display_menu():
+    print("MENU OPTIONS")
+    print("1 - Display lineup")
+    print("2 - Add player")
+    print("3 - Remove player")
+    print("4 - Move player")
+    print("5 - Edit player position")
+    print("6 - Edit player stats")
+    print("7 - Exit program")
+    print()
+    print("POSITIONS")
+    print("C, 1B, 2B, 3B, SS, LF, CF, RF, P")
+    print("="*65)
+
+# Menu options' functions
+def display_lineup():
+    # Print header
+    print(f"{'Player':<25}{'POS':<10}{'AB':<10}{'H':<10}{'AVG':<10}")
+    print("-"*65)
+
+    # Print player data
+    for player in player_list:
+        print(f"{player['name']:<25}{player['position']:<10}{player['at_bats']:<10}{player['hits']:<10}{player['average']:<10}")
+
+
+def main():
+    # Reads player stats from the specified file
+    while True:
+        # Gets the file name from the user
+        file_name = input("Enter the player list file name (e.g., players.csv or team.txt): ")
+        
+        try:
+            read_csv_file(file_name)
+            break
+        except FileNotFoundError:
+            print(f"File '{file_name}' not found.")
+        except Exception as e:
+            print(f"Error reading the file: {e}")
+
+    # Gets the dates and displays the menu
+    print("="*65)
+    print("\t\tBaseball Team Manager")
+    
+    get_date_current(current_date)
+    days_until_game = get_date_game(current_date)
+    print(f"DAYS UNTIL GAME: {days_until_game}")
+    print()
+
+    display_menu()
+
+    # Main options loop
+    option = input("Menu option: ")
+    while option != '7':
+        if option == '1':
+            display_lineup()
+        elif option == '2':
+            add_player()
+        elif option == '3':
+            remove_player()
+        elif option == '4':
+            move_player()
+        elif option == '5':
+            edit_player_position()
+        elif option == '6':
+            edit_player_stats()
+        else:
+            print("Invalid option")
+
+        option = input("Menu option: ")
+
+    print("Bye!")
+
+if __name__ == "__main__":
+    main()
